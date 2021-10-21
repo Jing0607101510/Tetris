@@ -8,7 +8,7 @@ class Map {
     public:
         Map(int width, int height);
         ~Map();
-        bool CheckHit(const Square& square);
+        bool CheckHit(int x, int y);
         int RemoveLineIfNeed(const Square& square);
 
     private:

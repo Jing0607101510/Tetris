@@ -18,9 +18,8 @@ Map::~Map() {
     }
 }
 
-bool Map::CheckHit(const Square& square) {
-    // TODO: 判断是否和边界，和frame上的方块接触（方法：先假设移动，再判断）
-    return false;
+bool Map::CheckHit(int x, int y) {
+    return frame_[x][y] == true;
 }
 
 int Map::RemoveLineIfNeed(const Square& square) {

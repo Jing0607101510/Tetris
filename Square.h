@@ -7,16 +7,20 @@
 class Square {
     public:
         typedef std::pair<int, int> Point;  // 一个小正方形的坐标
-        typedef std::vector<Point> Piece;   // 一个方块的所有坐标
-        typedef std::vector<Piece> PieceType;   // 一种方块
+        typedef std::vector<Point> Points;   // 一个方块的所有坐标
+        typedef std::vector<Points> PieceType;   // 一种方块
 
-        Square(const Square::Point base_pos);
+        Square();
+        Square(const Square::Point& base_pos);
         void RandSetPieceType();
         void RandSetRotationType();
         void Move(int dx, int dy);
 
-        Square::Piece GetPiecePoints();
+        Square::Points GetPiecePoints();
         Square::Point GetBasePos() const;
+        void SetRotationType(int type);
+        int GetRotationType() const;
+        void SetBasePos(const Square::Point& base_pos);
         int GetPieceHeight() const;
 
     private:

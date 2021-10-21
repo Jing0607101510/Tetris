@@ -2,7 +2,13 @@
 
 #include "Square.h"
 
-Square::Square(const Square::Point base_pos) {
+Square::Square() {
+    base_pos_ = {0, 0};
+    RandSetPieceType();
+    RandSetRotationType();
+}
+
+Square::Square(const Square::Point& base_pos) {
     base_pos_ = base_pos;
     RandSetPieceType();
     RandSetRotationType();
@@ -23,7 +29,7 @@ void Square::RandSetRotationType() {
     rotation_type_ = rand() % rotation_type_cnt;
 }
 
-Square::Piece Square::GetPiecePoints() {
+Square::Points Square::GetPiecePoints() {
     return all_pieces_[piece_type_][rotation_type_];
 }
 
@@ -33,6 +39,19 @@ int Square::GetPieceHeight() const {
 
 Square::Point Square::GetBasePos() const {
     return base_pos_;
+}
+
+void Square::SetBasePos(const Square::Point& base_pos) {
+    base_pos_ = base_pos;
+}
+
+void Square::SetRotationType(int type) {
+    int rotation_type_cnt = all_pieces_[piece_type_].size();
+    rotation_type_ = type % rotation_type_cnt;
+}
+
+int Square::GetRotationType() const {
+    return rotation_type_;
 }
 
 // 所有不同类型的方块的不同旋转形式的坐标，坐标是相对左上角。左上角的坐标为（0，0）
