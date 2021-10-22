@@ -18,13 +18,12 @@ class Tetris {
         bool Judge(const std::unique_ptr<Square>& square);
         void MoveSquare(std::unique_ptr<Square>& square, int dx, int dy);
         void RotateSquare(std::unique_ptr<Square>& square);
-        void DropSquare(std::unique_ptr<Square>& square);
-        
+        void DropSquare(std::unique_ptr<Square>& cur_square, std::unique_ptr<Square>& next_square);
+
     private:
         Map map_;
         int level_; // 难度
         int score_; // 得分
-        int line_up_step_pass_;  // 距离上次消除或者上移所经过的时间
         const int width_;
         const int height_;
         const int vertical_middle_bar_;

@@ -93,25 +93,42 @@ void Tetris::RotateSquare(std::unique_ptr<Square>& square) {
     }
 }
 
-void Tetris::DropSquare(std::unique_ptr<Square>& square) {
-    // TODO:
+void Tetris::DropSquare(std::unique_ptr<Square>& cur_square, std::unique_ptr<Square>& next_square) {
+    cur_square->Move(0, 1);
+    if (Judge(cur_square)) {
+        cur_square->Move(0, -1);
+        utils::EraseSquare(cur_square);
+        cur_square->Move(0, 1);
+        utils::DrawSquare(cur_square);
+    }
+    else {
+        // 不能再向下了，那么就需要合并到map中
+        // 判断是否能够消除
+        // 判断是否游戏结束
+        cur_square->Move(0, -1);
+        bool is_over = false;
+        map_.MergeSquare(cur_square, is_over);
+    }
 }
 
 bool Tetris::Playing() {
     utils::DrawBoundary(width_, height_, vertical_middle_bar_, horizontal_middle_bar_);
     
-    std::unique_ptr<Square> cur_square(new Square());
-    std::unique_ptr<Square> next_square(new Square());
+    map_.InitMap();
+
+    std::unique_ptr<Square> cur_square(new Square({width_/2, 0}));
+    std::unique_ptr<Square> next_square(new Square({vertical_middle_bar_+2, horizontal_middle_bar_-3}));
+    utils::DrawSquare(cur_square);
+    utils::DrawSquare(next_square);
 
     score_ = 0;
-    line_up_step_pass_ = 0;
     int square_drop_wait_steps = 150 * level_;
 
     int step = 0;
     while (true) {
         if (step == square_drop_wait_steps) {
             step = 0;
-            DropSquare(cur_square);
+            DropSquare(cur_square, next_square);
         }
         if (_kbhit()) {
             char key = _getch();
@@ -135,7 +152,6 @@ bool Tetris::Playing() {
         }
         Sleep(1);
         step++;
-        line_up_step_pass_++;
     }
 }
 
