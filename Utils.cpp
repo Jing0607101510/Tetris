@@ -24,6 +24,8 @@ namespace utils {
             case 4:
                 color = 0x0A;
                 break;
+            case 5:
+                color = 0x03;
             default:
                 color = 0x07;
                 break;
@@ -43,10 +45,26 @@ namespace utils {
         cursor_info.bVisible = false;
         SetConsoleCursorInfo(handle, &cursor_info);
     }
+    
+    void DrawScore(int x, int y, int score) {
+        SetColor(0);
+        SetPosition(2*x, y);
+        std::cout << "您的分数：";
+        SetPosition(2*x, y+1);
+        std::cout << score;
+        SetPosition(2*x, y+3);
+        std::cout << "下一个方块";
+    }
 
     void DrawBoundary(int width, int height, int vertical_middle_bar, int horizontal_middle_bar) {
-        SetColor(0);
+        // 这四个参数都是长度而不是位置
+        SetColor(5);
         // 上边界
+        width += 2;
+        height += 2;
+        vertical_middle_bar += 1;
+        horizontal_middle_bar += 1;
+
         for (int i = 0; i < width; i++) {
             SetPosition(i * 2, 0);
             std::cout << "■";  // 一个■占两个位置
@@ -63,7 +81,7 @@ namespace utils {
             std::cout << "■";
         }
 
-        for (int i = vertical_middle_bar; i < width - 1; i++) {
+        for (int i = vertical_middle_bar + 1; i < width - 1; i++) {
             SetPosition(i * 2, horizontal_middle_bar);
             std::cout << "■";
         }
@@ -78,9 +96,13 @@ namespace utils {
         for(int i = 0; i < point_cnt; i++) {
             int x = base_x + points[i].first;
             int y = base_y + points[i].second;
-            utils::SetColor(i+1);
-            utils::SetPosition(x*2, y);
-            std::cout << "■";
+            if (y >= 0) {
+                x = x + 1;
+                y = y + 1;
+                utils::SetColor(i+1);
+                utils::SetPosition(x*2, y);
+                std::cout << "■";
+            }
         }
     }
 
@@ -92,8 +114,12 @@ namespace utils {
         for(auto& point : points) {
             int x = base_x + point.first;
             int y = base_y + point.second;
-            utils::SetPosition(x*2, y);
-            std::cout << "  ";
+            if (y >= 0) {
+                x += 1;
+                y += 1;
+                utils::SetPosition(x*2, y);
+                std::cout << "  ";
+            }
         }
     }
 } 

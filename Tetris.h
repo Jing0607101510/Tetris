@@ -12,13 +12,13 @@ class Tetris {
 
     private:
         bool Welcome();
-        bool Playing();
+        void Playing();
         bool End();
-        bool Pause();
+        void Pause();
         bool Judge(const std::unique_ptr<Square>& square);
         void MoveSquare(std::unique_ptr<Square>& square, int dx, int dy);
         void RotateSquare(std::unique_ptr<Square>& square);
-        void DropSquare(std::unique_ptr<Square>& cur_square, std::unique_ptr<Square>& next_square);
+        bool DropSquare(std::unique_ptr<Square>& cur_square, std::unique_ptr<Square>& next_square);
 
     private:
         Map map_;

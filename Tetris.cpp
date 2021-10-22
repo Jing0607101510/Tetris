@@ -8,7 +8,7 @@
 
 
 Tetris::Tetris(int width, int height, int vertical_middle_bar, int horizontal_middle_bar) 
-            : map_(width, height), 
+            : map_(vertical_middle_bar, height), 
               level_(1), 
               score_(0),
               width_(width),
@@ -38,12 +38,12 @@ bool Tetris::Welcome() {
         if (_kbhit()) {
             choose = _getch();
             if ('q' == choose) {
-                return false;
+                return true;
             }
             else if(choose >= '1' && choose <= '3') {
                 level_ = choose - '0';
                 system("cls");
-                return true;
+                return false;
             }
         }
         Sleep(1000);
@@ -59,7 +59,10 @@ bool Tetris::Judge(const std::unique_ptr<Square>& square) {
     for (auto& point : points) {
         int x = base_x + point.first;
         int y = base_y + point.second;
-        if (x<0 || x>=width_ || y>=height_ || map_.CheckHit(x, y)) {
+        if (y < 0) {
+            continue;
+        }
+        if (x<0 || x>=vertical_middle_bar_ || y>=height_ || map_.CheckHit(x, y)) {
             return false;
         }
     }
@@ -93,13 +96,14 @@ void Tetris::RotateSquare(std::unique_ptr<Square>& square) {
     }
 }
 
-void Tetris::DropSquare(std::unique_ptr<Square>& cur_square, std::unique_ptr<Square>& next_square) {
+bool Tetris::DropSquare(std::unique_ptr<Square>& cur_square, std::unique_ptr<Square>& next_square) {
     cur_square->Move(0, 1);
     if (Judge(cur_square)) {
         cur_square->Move(0, -1);
         utils::EraseSquare(cur_square);
         cur_square->Move(0, 1);
         utils::DrawSquare(cur_square);
+        return true;
     }
     else {
         // 不能再向下了，那么就需要合并到map中
@@ -107,28 +111,49 @@ void Tetris::DropSquare(std::unique_ptr<Square>& cur_square, std::unique_ptr<Squ
         // 判断是否游戏结束
         cur_square->Move(0, -1);
         bool is_over = false;
-        map_.MergeSquare(cur_square, is_over);
+        score_ += map_.MergeSquare(cur_square, is_over);
+        
+        if (is_over) {
+            return false;   
+        }
+        else {
+            utils::EraseSquare(next_square);
+            std::unique_ptr<Square> tmp = std::move(cur_square);
+            cur_square = std::move(next_square);
+            cur_square->SetBasePos({vertical_middle_bar_/2, -cur_square->GetPieceHeight()});
+            next_square = std::move(tmp);
+            next_square->SetBasePos({vertical_middle_bar_+5, horizontal_middle_bar_-6});
+            next_square->RandSetPieceType();
+            next_square->RandSetRotationType();
+            utils::DrawScore(vertical_middle_bar_+4, 4, score_);
+            utils::DrawSquare(next_square);
+            return true;
+        }
     }
 }
 
-bool Tetris::Playing() {
+void Tetris::Playing() {
     utils::DrawBoundary(width_, height_, vertical_middle_bar_, horizontal_middle_bar_);
     
     map_.InitMap();
 
-    std::unique_ptr<Square> cur_square(new Square({width_/2, 0}));
-    std::unique_ptr<Square> next_square(new Square({vertical_middle_bar_+2, horizontal_middle_bar_-3}));
-    utils::DrawSquare(cur_square);
+    score_ = 0;
+    int square_drop_wait_steps = 15 * (4 - level_);
+
+    std::unique_ptr<Square> cur_square(new Square());
+    cur_square->SetBasePos({vertical_middle_bar_/2, -cur_square->GetPieceHeight()});
+    std::unique_ptr<Square> next_square(new Square({vertical_middle_bar_+5, horizontal_middle_bar_-6}));
+    utils::DrawScore(vertical_middle_bar_+4, 4, score_);
     utils::DrawSquare(next_square);
 
-    score_ = 0;
-    int square_drop_wait_steps = 150 * level_;
 
     int step = 0;
     while (true) {
         if (step == square_drop_wait_steps) {
             step = 0;
-            DropSquare(cur_square, next_square);
+            if(!DropSquare(cur_square, next_square)) {
+                return;
+            }
         }
         if (_kbhit()) {
             char key = _getch();
@@ -155,8 +180,8 @@ bool Tetris::Playing() {
     }
 }
 
-bool Tetris::Pause() {
-    utils::SetPosition((vertical_middle_bar_+1)*2, horizontal_middle_bar_-1);
+void Tetris::Pause() {
+    utils::SetPosition((vertical_middle_bar_+3)*2, horizontal_middle_bar_-1);
     utils::SetColor(5);
     std::cout << "游戏暂停";
 
@@ -169,12 +194,14 @@ bool Tetris::Pause() {
         Sleep(1000);
     }
     
-    utils::SetPosition((vertical_middle_bar_+1)*2, horizontal_middle_bar_-1);
-    std::cout << "    ";
+    utils::SetPosition((vertical_middle_bar_+3)*2, horizontal_middle_bar_-1);
+    std::cout << "        ";
 }
 
 bool Tetris::End() {
+    system("cls");
     utils::SetColor(0);
+
     std::cout << "■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■" << std::endl;
     std::cout << "                  俄罗斯方块               " << std::endl;
     std::cout << "■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■" << std::endl;
@@ -190,11 +217,11 @@ bool Tetris::End() {
         if (_kbhit()) {
             choose = _getch();
             if ('q' == choose) {
-                return false;
+                return true;
             }
             else {
                 system("cls");
-                return true;
+                return false;
             }
         }
         Sleep(1000);
@@ -202,6 +229,8 @@ bool Tetris::End() {
 }
 
 void Tetris::Run() {
+    utils::SetCursorNotVisible();
+
     bool quit = false;
     while (true) {
         quit = Welcome();
@@ -209,10 +238,7 @@ void Tetris::Run() {
             break;
         }
 
-        quit = Playing();
-        if (quit) {
-            break;
-        }
+        Playing();
 
         quit = End();
         if (quit) {

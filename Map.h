@@ -12,7 +12,6 @@ class Map {
         ~Map();
         bool CheckHit(int x, int y);
         int MergeSquare(const std::unique_ptr<Square>& square, bool& is_over);
-        bool LineUp();
         void InitMap();
 
     private:
@@ -21,8 +20,7 @@ class Map {
     private:
         const int width_;
         const int height_;
-        int top_;
-        std::vector<bool*> frame_;  // Â±ÄÈù¢
+        std::vector<bool*> frame_;  // æ÷√Ê
 };
 
 #endif

@@ -25,7 +25,7 @@ bool Map::CheckHit(int x, int y) {
     return frame_[y][x] == true;
 }
 
-// å¤„ç†æ–¹å—çš„åˆå¹¶ï¼Œèƒ½å¤Ÿæ¶ˆé™¤çš„æ¶ˆé™¤
+// ´¦Àí·½¿éµÄºÏ²¢£¬ÄÜ¹»Ïû³ıµÄÏû³ı
 int Map::MergeSquare(const std::unique_ptr<Square>& square, bool& is_over) {
     auto base_pos = square->GetBasePos();
     auto points = square->GetPiecePoints();
@@ -38,13 +38,9 @@ int Map::MergeSquare(const std::unique_ptr<Square>& square, bool& is_over) {
             return 0;
         }
         frame_[y][x] = true;
-        utils::SetPosition(x*2, y);
+        utils::SetPosition((x+1)*2, y+1);
         utils::SetColor(0);
-        std::cout << "â– ";
-
-        if (y < top_) {
-            top_ = y;
-        }
+        std::cout << "¡ö";
     }
 
     return RemoveLineIfNeed(base_pos.second, square->GetPieceHeight());
@@ -70,9 +66,9 @@ int Map::RemoveLineIfNeed(int base_y, int height) {
             for (int j = i; j > 0; j--) {
                 frame_[j] = frame_[j-1];
                 for (int k = 0; k < width_; k++) {
-                    utils::SetPosition(k*2, j);
+                    utils::SetPosition((k+1)*2, j+1);
                     if (frame_[j][k]) {
-                        std::cout << "â– ";
+                        std::cout << "¡ö";
                     }
                     else {
                         std::cout << "  ";
@@ -82,23 +78,17 @@ int Map::RemoveLineIfNeed(int base_y, int height) {
 
             frame_[0] = tmp;
             for (int k = 0; k < width_; k++) {
-                utils::SetPosition(k*2, 0);
-                std::cout << " ";
+                utils::SetPosition((k+1)*2, 1);
+                std::cout << "  ";
             }
 
             win_score += width_;
-            top_++;
         }
     }
     return win_score;
 }
 
-bool Map::LineUp() {
-
-}
-
 void Map::InitMap() {
-    top_ = height_;
     for (int i = 0; i < height_; i++) {
         memset(frame_[i], 0, width_);
     }
